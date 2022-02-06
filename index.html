@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hello OpenCV.js</title>
+</head>
+<body>
+<h2>Hello OpenCV.js</h2>
+<p id="status">Page is loading...</p>
+<div>
+    <div class="inputoutput">
+        <img id="imageSrc" alt="No Image" />
+        <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
+    </div>
+    <div class="inputoutput">
+        <canvas id="canvasOutput" ></canvas>
+        <div class="caption">canvasOutput</div>
+    </div>
+</div>
+<script type="text/javascript">
+    let imgElement = document.getElementById('imageSrc');
+    let inputElement = document.getElementById('fileInput');
+    inputElement.addEventListener('change', (e) => {
+        imgElement.src = URL.createObjectURL(e.target.files[0]);
+    }, false);
+
+    function calculate_border(height, width) {
+        let diff = Math.abs(height - width);
+        let padding = Math.floor(diff/2);
+        if (height > width) {
+            return [0, 0, padding, padding];
+        }
+        return [padding, padding, 0, 0];
+    }
+
+    imgElement.onload = function() {
+        let img = cv.imread(imgElement);
+        let size = img.size();
+        let {height, width} = size;
+        let [top, bottom, left, right] = calculate_border(height, width);
+        let result = cv.Mat.zeros(width + left + right, height + top + bottom, cv.CV_8UC3);
+        let white = new cv.Scalar(255, 255, 255, 255);
+        cv.copyMakeBorder(img, result, top, bottom, left, right, cv.BORDER_CONSTANT, white);
+        cv.imshow('canvasOutput', result);
+        img.delete();
+    };
+    function onOpenCvReady() {
+        document.getElementById('status').innerHTML = 'Page ready.';
+    }
+</script>
+<script async src="opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+</body>
+</html>
